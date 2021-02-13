@@ -18,25 +18,71 @@ consumes:
 produces:
   - application/json
 paths:
-  /hello:
+  /user/register:
     # binds a127 app logic to a route
-    x-swagger-router-controller: hello_world
-    get:
-      description: Returns 'Hello' to the caller
+    x-swagger-router-controller: user
+    post:
+      tags:
+        - User
+      description: Register a new User
       # used as the method name of the controller
-      operationId: hello
+      operationId: registerUser
       parameters:
-        - name: name
-          in: query
-          description: The name of the person to whom to say hello
-          required: false
-          type: string
+        - in: body
+          name: register data
+          description: The data to register a new user
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
       responses:
         "200":
           description: Success
           schema:
             # a pointer to a definition
-            $ref: "#/definitions/HelloWorldResponse"
+            $ref: "#/definitions/TokenResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user/autheticate:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: user
+    post:
+      tags:
+        - User
+      description: Authenticate a new User
+      # used as the method name of the controller
+      operationId: authenticateUser
+      parameters:
+        - in: body
+          name: request
+          description: The data to authenticate a new user
+          required: true
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/TokenResponse"
         # responses may fall through to errors
         default:
           description: Error
@@ -45,16 +91,22 @@ paths:
   /swagger:
     x-swagger-pipe: swagger_raw
 # complex objects have schema definitions
+tags:
+  - name: User
+    description: Resource for User data
 definitions:
-  HelloWorldResponse:
-    required:
-      - message
-    properties:
-      message:
-        type: string
+  TokenResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
   ErrorResponse:
     required:
       - message
     properties:
       message:
         type: string
+      err:
+        type: object
